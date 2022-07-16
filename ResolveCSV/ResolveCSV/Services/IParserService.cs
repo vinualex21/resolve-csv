@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ResolveCSV.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,7 @@ namespace ResolveCSV.Services
 {
     public interface IParserService
     {
-        public List<T> ParsePersonDetails<T>(string filePath, string delimiter);
+        public List<T> ParseFileData<T>(string filePath, string delimiter) where T : IPopulatedFromCsv, new();
 
-        public List<T> Parse<T>(string data, string delimiter);
     }
 }

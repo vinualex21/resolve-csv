@@ -1,6 +1,9 @@
-﻿using System;
+﻿using ResolveCSV.CustomParser;
+using ResolveCSV.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,13 +11,31 @@ namespace ResolveCSV.Services
 {
     public class ParserService : IParserService
     {
-        public List<T> ParsePersonDetails<T>(string filePath, string delimiter)
-        {
-            if(File.Exists(filePath))
-            {
-                List<T> persons = new List<T>();
+        private readonly ICustomParser _customParser;
 
-                return persons;
+        public ParserService(ICustomParser customParser)
+        {
+            _customParser = customParser;
+        }
+
+        #region Public Methods
+
+        public List<T> ParseFileData<T>(string filePath, string delimiter) where T : IPopulatedFromCsv, new()
+        {
+            var data = GetFileData(filePath);
+
+            return _customParser.Parse<T>(data, delimiter);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private string GetFileData(string filePath)
+        {
+            if (File.Exists(filePath))
+            {
+                return File.ReadAllText(filePath);
             }
             else
             {
@@ -22,9 +43,10 @@ namespace ResolveCSV.Services
             }
         }
 
-        public List<T> Parse<T>(string data, string delimiter)
-        {
-            throw new NotImplementedException();
-        }
+        
+
+        #endregion
     }
+
+    
 }
