@@ -7,7 +7,7 @@ using ResolveCSV.Services;
 
 namespace ResolveCSV.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/people")]
     [ApiController]
     public class ParserController : ControllerBase
     {
@@ -15,16 +15,14 @@ namespace ResolveCSV.Controllers
         private readonly IParserService _parserService;
         private readonly IQueryService _queryService;
         private readonly ILogger<ParserController> _logger;
-        private List<Person> _personDetails;
 
-        public ParserController(IConfiguration configuration, IParserService parserService, 
+        public ParserController(IConfiguration configuration, IParserService parserService,
                                     IQueryService queryService, ILogger<ParserController> logger)
         {
             _configuration = configuration;
             _parserService = parserService;
             _queryService = queryService;
             _logger = logger;
-            _personDetails = FetchPersonDetails();
         }
 
         /// <summary>
@@ -32,7 +30,6 @@ namespace ResolveCSV.Controllers
         /// </summary>
         /// <returns>Position in list, full name, company name</returns>
         [HttpGet]
-        [Route("/people")]
         public ActionResult<List<Person>> GetPersons()
         {
             List<Person> persons = null;
@@ -43,7 +40,7 @@ namespace ResolveCSV.Controllers
                 persons = _parserService.ParseFileData<Person>(filePath, ",");
                 persons = _queryService.SetPosition(persons);
             }
-            catch(FileNotFoundException ex)
+            catch (FileNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -54,11 +51,24 @@ namespace ResolveCSV.Controllers
             return persons;
         }
 
-        [HttpGet("{companyName}")]
-        public PersonDto GetCompanyNameContains(string companyName)
+        [HttpGet("company")]
+        public ActionResult<PersonDto> GetCompanyNameContains(string companyName)
         {
-            var filteredByCompany = _personDetails.Where(p => p.CompanyName.Contains(companyName));
+            var personDetails = FetchPersonDetails();
+            var filteredByCompany = personDetails.Where(p => p.CompanyName.Contains(companyName));
+            if (filteredByCompany.Count() == 0)
+                return NotFound("The query yielded no results. Please check and try again.");
             return TransformPersonDetails(filteredByCompany);
+        }
+
+        [HttpGet("county")]
+        public ActionResult<PersonDto> GetPeopleByCounty(string countyName)
+        {
+            var personDetails = FetchPersonDetails();
+            var filteredByCounty = personDetails.Where(p => p.County.Contains(countyName));
+            if (filteredByCounty.Count() == 0)
+                return NotFound("The query yielded no results. Please check and try again.");
+            return TransformPersonDetails(filteredByCounty);
         }
 
         private List<Person> FetchPersonDetails()

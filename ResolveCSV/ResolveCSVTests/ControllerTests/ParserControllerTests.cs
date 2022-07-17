@@ -81,5 +81,106 @@ namespace ResolveCSVTests.ControllerTests
             //Assert
             result.Result.Should().BeOfType(typeof(NotFoundObjectResult));
         }
+
+        [Test]
+        public void GetCompanyNameContains_IfNoResultsFound_ReturnsNotFoundMessage()
+        {
+            //Arrange
+            var parsedResult = GetInputDetails();
+            _parserService.Setup(p => p.ParseFileData<Person>(It.IsAny<string>(), It.IsAny<string>())).Returns(parsedResult);
+            _queryService.Setup(p => p.SetPosition(It.IsAny<List<Person>>())).Returns(parsedResult);
+            var companyName = "OxygenElectronics";
+
+            //Act
+            var result = _parserController.GetCompanyNameContains(companyName);
+
+            //Assert
+            result.Result.Should().BeOfType(typeof(NotFoundObjectResult));
+        }
+
+        [Test]
+        public void GetCompanyNameContains_MatchFound_ReturnsPeople()
+        {
+            //Arrange
+            var parsedResult = GetInputDetails();
+            _parserService.Setup(p => p.ParseFileData<Person>(It.IsAny<string>(), It.IsAny<string>())).Returns(parsedResult);
+            _queryService.Setup(p => p.SetPosition(It.IsAny<List<Person>>())).Returns(parsedResult);
+            var companyName = "Industrial Engineering Assocs";
+
+            //Act
+            var result = _parserController.GetCompanyNameContains(companyName);
+
+            //Assert
+            result.Should().BeOfType(typeof(ActionResult<PersonDto>));
+            result.Value.Count.Should().Be(1);
+        }
+
+        [Test]
+        public void GetPeopleByCounty_IfNoResultsFound_ReturnsNotFoundMessage()
+        {
+            //Arrange
+            var parsedResult = GetInputDetails();
+            _parserService.Setup(p => p.ParseFileData<Person>(It.IsAny<string>(), It.IsAny<string>())).Returns(parsedResult);
+            _queryService.Setup(p => p.SetPosition(It.IsAny<List<Person>>())).Returns(parsedResult);
+            var countyName = "FakeCounty";
+
+            //Act
+            var result = _parserController.GetPeopleByCounty(countyName);
+
+            //Assert
+            result.Result.Should().BeOfType(typeof(NotFoundObjectResult));
+        }
+
+        [Test]
+        public void GetPeopleByCounty_MatchFound_ReturnsPeople()
+        {
+            //Arrange
+            var parsedResult = GetInputDetails();
+            _parserService.Setup(p => p.ParseFileData<Person>(It.IsAny<string>(), It.IsAny<string>())).Returns(parsedResult);
+            _queryService.Setup(p => p.SetPosition(It.IsAny<List<Person>>())).Returns(parsedResult);
+            var countyName = "North Somerset";
+
+            //Act
+            var result = _parserController.GetPeopleByCounty(countyName);
+
+            //Assert
+            result.Should().BeOfType(typeof(ActionResult<PersonDto>));
+            result.Value.Count.Should().Be(1);
+        }
+
+        private List<Person> GetInputDetails()
+        {
+            return new List<Person>()
+            {
+                new Person()
+                {
+                    FirstName = "Rueben",
+                    LastName =  "Gastellum",
+                    CompanyName = "Industrial Engineering Assocs",
+                    Address = "4 Forrest St",
+                    City = "Weston-Super-Mare",
+                    County = "North Somerset",
+                    Postal = "BS23 3HG",
+                    Phone1 = "01976-755279",
+                    Phone2 = "01956-535511",
+                    Email = "rueben_gastellum@gastellum.co.uk",
+                    Web = "http://www.industrialengineeringassocs.co.uk"
+                },
+                new Person()
+                {
+                    FirstName = "Albin",
+                    LastName =  "Jose",
+                    CompanyName = "Ponekkara Sons",
+                    Address = "7 Ponevazhi",
+                    City = "Kochi",
+                    County = "Ernakulam",
+                    Postal = "KC23 3RX",
+                    Phone1 = "01976-295387",
+                    Phone2 = "01956-323899",
+                    Email = "albinjose@ponesons.co.uk",
+                    Web = "http://www.celloserenades.co.uk"
+                }
+            };
+        }
     }
 }
