@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ResolveCSV.Models;
 using ResolveCSV.Services;
+using System.Text.RegularExpressions;
 
 namespace ResolveCSV.Controllers
 {
@@ -69,6 +70,47 @@ namespace ResolveCSV.Controllers
             if (filteredByCounty.Count() == 0)
                 return NotFound("The query yielded no results. Please check and try again.");
             return TransformPersonDetails(filteredByCounty);
+        }
+
+        [HttpGet("houseNumber")]
+        public ActionResult<PersonDto> GetPeopleByHouseNumberDigitCount(int digits)
+        {
+            var personDetails = FetchPersonDetails();
+            var filteredByDigits = personDetails.Where(p => p.Address.TakeWhile(char.IsDigit).ToArray().Count() == digits);
+            if (filteredByDigits.Count() == 0)
+                return NotFound("The query yielded no results. Please check and try again.");
+            return TransformPersonDetails(filteredByDigits);
+        }
+
+        [HttpGet("website")]
+        public ActionResult<PersonDto> GetPeopleByWebsiteLength(int length)
+        {
+            var personDetails = FetchPersonDetails();
+            var filteredByWebsiteLength = personDetails.Where(p => p.Web.Length > length);
+            if (filteredByWebsiteLength.Count() == 0)
+                return NotFound("The query yielded no results. Please check and try again.");
+            return TransformPersonDetails(filteredByWebsiteLength);
+        }
+
+        [HttpGet("postcode")]
+        public ActionResult<PersonDto> GetPeopleByPostCodeArea(int areaDigits)
+        {
+            var personDetails = FetchPersonDetails();
+            var filteredByAreaCodeDigits = personDetails.Where(p => Regex.Match(p.Postal.Split(' ')[0], @"\d+").Value.Length == areaDigits );
+            if (filteredByAreaCodeDigits.Count() == 0)
+                return NotFound("The query yielded no results. Please check and try again.");
+            return TransformPersonDetails(filteredByAreaCodeDigits);
+        }
+
+        [HttpGet("phoneNumber")]
+        public ActionResult<PersonDto> GetPeopleByPhoneNumberDifference()
+        {
+            var personDetails = FetchPersonDetails();
+            var filteredByPhoneNumber = personDetails.Where(p => 
+                    (int.TryParse(p.Phone1.Replace("-",""),out int x)?x:0) > (int.TryParse(p.Phone2.Replace("-", ""), out int y) ? y : 0));
+            if (filteredByPhoneNumber.Count() == 0) 
+                return NotFound("The query yielded no results. Please check and try again.");
+            return TransformPersonDetails(filteredByPhoneNumber);
         }
 
         private List<Person> FetchPersonDetails()
