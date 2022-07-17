@@ -11,6 +11,7 @@ using Moq;
 using System.IO;
 using FluentAssertions;
 using ResolveCSV.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ResolveCSVTests.ControllerTests
 {
@@ -62,5 +63,17 @@ namespace ResolveCSVTests.ControllerTests
             result.Value.Should().HaveCount(1);
         }
 
+        [Test]
+        public void GetPersons_FileDoesNotExist_ReturnsNotFoundActionResult()
+        {
+            //Arrange
+            _parserService.Setup(p=>p.ParseFileData<Person>(It.IsAny<string>(),It.IsAny<string>())).Throws<FileNotFoundException>();
+
+            //Act
+            var result = _parserController.GetPersons();
+
+            //Assert
+            result.Result.Should().BeOfType(typeof(NotFoundObjectResult));
+        }
     }
 }

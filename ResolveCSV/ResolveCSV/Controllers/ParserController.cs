@@ -23,9 +23,21 @@ namespace ResolveCSV.Controllers
         [HttpGet]
         public ActionResult<List<Person>> GetPersons()
         {
-            string relativeFilePath = _configuration[Constants.Configuration.InputFilePath];
-            string filePath = $"{Environment.CurrentDirectory}{relativeFilePath}";
-            var persons = _parserService.ParseFileData<Person>(filePath, ",");
+            List<Person> persons = null;
+            try
+            {
+                string relativeFilePath = _configuration[Constants.Configuration.InputFilePath];
+                string filePath = $"{Environment.CurrentDirectory}{relativeFilePath}";
+                persons = _parserService.ParseFileData<Person>(filePath, ",");
+            }
+            catch(FileNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
             return persons;
         }
     }
