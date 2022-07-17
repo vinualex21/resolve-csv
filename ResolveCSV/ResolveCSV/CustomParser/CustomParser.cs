@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ResolveCSV.CustomParser
@@ -14,7 +15,13 @@ namespace ResolveCSV.CustomParser
     /// </summary>
     public class CustomParser : ICustomParser
     {
-        public List<T> Parse<T>(string data, string delimiter) where T : IPopulatedFromCsv, new()
+        public List<T> Parse<T>(string filePath, string delimiter) where T : IPopulatedFromCsv, new()
+        {
+            var data = File.ReadAllText(filePath);
+            return ParseData<T>(data, delimiter);
+        }
+
+        public List<T> ParseData<T>(string data, string delimiter) where T : IPopulatedFromCsv, new()
         {
             List<T> dataItems = new List<T>();
 
@@ -85,7 +92,9 @@ namespace ResolveCSV.CustomParser
         private T Populate<T>(string line, string delimiter, List<PropertyInfo> props) where T : IPopulatedFromCsv, new()
         {
             T t = Create<T>();
-            var fieldValues = line.Split(delimiter);
+            //ignore delimiter within quotes
+            var fieldValues = Regex.Split(line, $"{delimiter}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+
             // Unmapped fields will have a null property, and we also skip empty fields, 
             // and trim the field value before doing the type conversion.
             props.ForEach(fieldValues,

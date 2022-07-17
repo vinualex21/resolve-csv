@@ -32,6 +32,7 @@ namespace ResolveCSV.Controllers
         /// </summary>
         /// <returns>Position in list, full name, company name</returns>
         [HttpGet]
+        [Route("/people")]
         public ActionResult<List<Person>> GetPersons()
         {
             List<Person> persons = null;
@@ -51,6 +52,13 @@ namespace ResolveCSV.Controllers
                 return BadRequest(ex.Message);
             }
             return persons;
+        }
+
+        [HttpGet("{companyName}")]
+        public PersonDto GetCompanyNameContains(string companyName)
+        {
+            var filteredByCompany = _personDetails.Where(p => p.CompanyName.Contains(companyName));
+            return TransformPersonDetails(filteredByCompany);
         }
 
         private List<Person> FetchPersonDetails()
@@ -74,6 +82,18 @@ namespace ResolveCSV.Controllers
                 throw;
             }
             return persons;
+        }
+
+        private PersonDto TransformPersonDetails(IEnumerable<Person> persons)
+        {
+            if(persons == null || persons.Count() == 0)
+                return null;
+
+            PersonDto personDto = new PersonDto();
+            personDto.PersonDetails = persons.Select(p => $"{p.Position} - {p.FirstName} {p.LastName} - {p.CompanyName} ").ToList();
+            personDto.Count = personDto.PersonDetails.Count();
+
+            return personDto;
         }
     }
 }

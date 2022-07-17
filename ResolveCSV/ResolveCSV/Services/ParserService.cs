@@ -22,9 +22,9 @@ namespace ResolveCSV.Services
 
         public List<T> ParseFileData<T>(string filePath, string delimiter) where T : IPopulatedFromCsv, new()
         {
-            var data = GetFileData(filePath);
+            //var data = GetFileData(filePath);
 
-            return _customParser.Parse<T>(data, delimiter);
+            return _customParser.Parse<T>(filePath, delimiter);
         }
 
         #endregion

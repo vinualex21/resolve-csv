@@ -9,6 +9,6 @@ namespace ResolveCSV.CustomParser
 {
     public interface ICustomParser
     {
-        public List<T> Parse<T>(string data, string delimiter) where T : IPopulatedFromCsv, new();
+        public List<T> Parse<T>(string filePath, string delimiter) where T : IPopulatedFromCsv, new();
     }
 }
