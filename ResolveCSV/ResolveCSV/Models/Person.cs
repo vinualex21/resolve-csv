@@ -9,6 +9,7 @@ namespace ResolveCSV.Models
 {
     public class Person : IPopulatedFromCsv
     {
+        public int Position { get; set; }
         [ColumnMap(Header = "first_name")]
         public string FirstName { get; set; }
         [ColumnMap(Header = "last_name")]

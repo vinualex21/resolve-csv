@@ -12,6 +12,7 @@ using System.IO;
 using FluentAssertions;
 using ResolveCSV.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace ResolveCSVTests.ControllerTests
 {
@@ -20,6 +21,8 @@ namespace ResolveCSVTests.ControllerTests
         private ParserController _parserController;
         private IConfiguration _configuration;
         private Mock<IParserService> _parserService;
+        private Mock<IQueryService> _queryService;
+        private Mock<ILogger<ParserController>> _logger;
 
         [SetUp]
         public void Setup()
@@ -30,7 +33,9 @@ namespace ResolveCSVTests.ControllerTests
                .AddEnvironmentVariables()
                .Build();
             _parserService = new Mock<IParserService>();
-            _parserController = new ParserController(_configuration, _parserService.Object);
+            _queryService = new Mock<IQueryService>();
+            _logger = new Mock<ILogger<ParserController>>();
+            _parserController = new ParserController(_configuration, _parserService.Object, _queryService.Object, _logger.Object);
         }
 
         [Test]
@@ -55,6 +60,7 @@ namespace ResolveCSVTests.ControllerTests
                 }
             };
             _parserService.Setup(p=>p.ParseFileData<Person>(It.IsAny<string>(), It.IsAny<string>())).Returns(parsedResult);
+            _queryService.Setup(p => p.SetPosition(It.IsAny<List<Person>>())).Returns(parsedResult);
 
             //Act
             var result = _parserController.GetPersons();

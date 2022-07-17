@@ -13,13 +13,24 @@ namespace ResolveCSV.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IParserService _parserService;
+        private readonly IQueryService _queryService;
+        private readonly ILogger<ParserController> _logger;
+        private List<Person> _personDetails;
 
-        public ParserController(IConfiguration configuration, IParserService parserService)
+        public ParserController(IConfiguration configuration, IParserService parserService, 
+                                    IQueryService queryService, ILogger<ParserController> logger)
         {
             _configuration = configuration;
             _parserService = parserService;
+            _queryService = queryService;
+            _logger = logger;
+            _personDetails = FetchPersonDetails();
         }
 
+        /// <summary>
+        /// Get details of every person in the input file
+        /// </summary>
+        /// <returns>Position in list, full name, company name</returns>
         [HttpGet]
         public ActionResult<List<Person>> GetPersons()
         {
@@ -29,6 +40,7 @@ namespace ResolveCSV.Controllers
                 string relativeFilePath = _configuration[Constants.Configuration.InputFilePath];
                 string filePath = $"{Environment.CurrentDirectory}{relativeFilePath}";
                 persons = _parserService.ParseFileData<Person>(filePath, ",");
+                persons = _queryService.SetPosition(persons);
             }
             catch(FileNotFoundException ex)
             {
@@ -37,6 +49,29 @@ namespace ResolveCSV.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+            return persons;
+        }
+
+        private List<Person> FetchPersonDetails()
+        {
+            List<Person> persons = null;
+            try
+            {
+                string relativeFilePath = _configuration[Constants.Configuration.InputFilePath];
+                string filePath = $"{Environment.CurrentDirectory}{relativeFilePath}";
+                persons = _parserService.ParseFileData<Person>(filePath, ",");
+                persons = _queryService.SetPosition(persons);
+            }
+            catch (FileNotFoundException ex)
+            {
+                _logger.Log(LogLevel.Error, ex.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex.Message);
+                throw;
             }
             return persons;
         }

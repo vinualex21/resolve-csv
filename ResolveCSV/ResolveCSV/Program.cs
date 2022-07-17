@@ -1,3 +1,4 @@
+using ResolveCSV.Controllers;
 using ResolveCSV.CustomParser;
 using ResolveCSV.Services;
 
@@ -12,6 +13,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IParserService, ParserService>();
 builder.Services.AddScoped<ICustomParser, CustomParser>();
+builder.Services.AddScoped<IQueryService, QueryService>();
+
 
 var app = builder.Build();
 
